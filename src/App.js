@@ -1,72 +1,93 @@
+
 import React from "react";
 import "./App.css";
-import "font-awesome/css/font-awesome.min.css";
-
-import Pictogramme from "./Composants/Pictogramme";
-import Commentaire from "./Composants/Commentaire";
 
 class App extends React.Component {
-
   constructor(props) {
     super(props);
 
     this.state = {
-      message: 'Bonne découverte des composants React "Components!!!"'
+      msg: "Veuillez vous inscrire",
+      ins: "Inscription",
+      showLink: false
     };
-
-    this.handleLike = this.handleLike.bind(this);
   }
 
-  handleLike() {
+  Changement = () => {
     this.setState({
-      message: "Premier défi réussi"
+      msg: "Suivez les màj",
+      ins: "Déjà inscrit"
     });
-  }
+  };
+
+  Sonnerie = () => {
+    this.setState({ showLink: true });
+
+    // Create a bell-like sound
+    const AudioContextClass =
+      window.AudioContext || window.webkitAudioContext;
+
+    if (!AudioContextClass) return;
+
+    const audio = new AudioContextClass();
+
+    audio.resume().then(() => {
+      [880, 1175].forEach((frequency, index) => {
+        const oscillator = audio.createOscillator();
+        const volume = audio.createGain();
+
+        oscillator.type = "sine";
+        oscillator.frequency.value = frequency;
+
+        volume.gain.setValueAtTime(0.2, audio.currentTime);
+        volume.gain.exponentialRampToValueAtTime(
+          0.001,
+          audio.currentTime + 0.6
+        );
+
+        oscillator.connect(volume);
+        volume.connect(audio.destination);
+
+        oscillator.start(audio.currentTime + index * 0.12);
+        oscillator.stop(audio.currentTime + index * 0.12 + 0.6);
+      });
+
+      setTimeout(() => audio.close(), 1200);
+    }).catch(() => {});
+  };
+
+  CacherLien = () => {
+    this.setState({ showLink: false });
+  };
 
   render() {
     return (
-      <div className="col-6 offset-3">
+      <div className="container">
+        <h1>{this.state.msg}</h1>
 
-        <div className="card">
+        <button onClick={this.Changement}>
+          {this.state.ins}
+        </button>
 
-          <div className="card-block">
+        <div
+          className="cloches"
+          onMouseEnter={this.Sonnerie}
+          onMouseLeave={this.CacherLien}
+        >
+          
+          <span className="cloche">🔔</span>
 
-            <div className="row">
-
-              <div className="col-2">
-                <img
-                  src="https://thomas-bart.com/wp-content/uploads/2017/03/developper-1680x1201.jpg"
-                  className="rounded float-left img-thumbnail"
-                  width="80"
-                  height="70"
-                  alt=""
-                />
-              </div>
-
-              <div className="col-10 profile-row">
-                <div className="row">
-                  <a href="#">
-                    <h1>Débuter avec React</h1>
-                  </a>
-                </div>
-              </div>
-
-            </div>
-
-            <p>{this.state.message}</p>
-
-            <div>
-              <Pictogramme onLike={this.handleLike} />
-            </div>
-
-          </div>
-
-          <div className="card-footer text-muted">
-            <Commentaire />
-          </div>
-
+          {this.state.showLink && (
+            <a
+              href="https://react.dev/"
+              target="_blank"
+              rel="noreferrer"
+              className="lien"
+            >
+              Suivez les mises à jour
+            </a>
+          )}
         </div>
-
       </div>
     );
   }
